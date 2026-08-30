@@ -11,8 +11,9 @@ A custom Obsidian plugin to seamlessly track time spent on daily habits directly
 
 ## Prerequisites
 
-While this plugin works standalone for tracking time, to fully utilize the data and build dashboards, you must install:
+While this plugin works standalone for tracking time, to fully utilize the data and build robust dashboards, you must install:
 - **[Dataview](https://github.com/blacksmithgu/obsidian-dataview)** (Community Plugin): Required to parse the inline time fields and build the habits dashboard. Make sure to enable JavaScript queries in Dataview settings if you plan to use DataviewJS.
+- **[Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks)** (Community Plugin): Highly recommended for querying and organizing your TODOs across different daily notes and projects.
 
 ## How to Use
 
@@ -43,3 +44,8 @@ The true power of this format is querying it with Dataview. You can build a dash
 ![Habits Dashboard](assets/dashboard.png)
 
 *Note: For the cleanest look in your notes, we recommend going to **Settings > Dataview** and turning OFF "Enable Inline Field Highlighting". This keeps your time fields looking like regular text.*
+
+### 4. Advanced TODO Queries
+By leveraging the **Tasks** plugin, you can easily pull active TODOs from your daily notes and organize them dynamically by category (e.g., `#casa`, `#extra-work`).
+
+![Tasks Queries](assets/tasks-query.png)
