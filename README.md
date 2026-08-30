@@ -44,7 +44,6 @@ The true power of this format is querying it with Dataview. You can build a dash
 
 ![Habits Dashboard](assets/dataview_dashboard.png)
 
-*Note: For the cleanest look in your notes, we recommend going to **Settings > Dataview** and turning OFF "Enable Inline Field Highlighting". This keeps your time fields looking like regular text.*
 
 ### 4. Advanced TODO Queries
 By leveraging the **Tasks** plugin, you can easily pull active TODOs from your daily notes and organize them dynamically by category (e.g., `#home`, `#work`) into a master dashboard.
