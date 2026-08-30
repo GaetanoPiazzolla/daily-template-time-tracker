@@ -1,0 +1,10 @@
+{
+	"id": "daily-template-time-tracker",
+	"name": "Daily Template Time Tracker",
+	"version": "1.0.0",
+	"minAppVersion": "1.0.0",
+	"description": "Adds inline start/stop timer buttons to #daily checkbox items. Writes elapsed time as Dataview inline fields.",
+	"author": "Gaetano Piazzolla",
+	"authorUrl": "https://github.com/GaetanoPiazzolla",
+	"isDesktopOnly": false
+}

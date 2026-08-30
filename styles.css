@@ -1,0 +1,47 @@
+.dttt-timer-container {
+	display: inline-flex;
+	align-items: center;
+	margin-left: 6px;
+	vertical-align: middle;
+}
+
+.dttt-timer-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	font-size: 12px;
+	line-height: 1;
+	border-radius: var(--radius-s);
+	background-color: var(--interactive-normal);
+	color: var(--text-muted);
+	border: 1px solid var(--background-modifier-border);
+	cursor: pointer;
+	transition: background-color 0.15s ease;
+}
+
+.dttt-timer-btn:hover {
+	background-color: var(--interactive-hover);
+	color: var(--text-accent);
+}
+
+.dttt-timer-btn.dttt-running {
+	background-color: var(--text-error-bg);
+	color: var(--text-error);
+	border-color: var(--text-error);
+}
+
+.dttt-timer-badge {
+	margin-left: 4px;
+	font-size: 11px;
+	font-weight: 600;
+	font-family: var(--font-monospace);
+	color: var(--text-accent);
+}
+
+.dttt-status-bar {
+	font-size: 12px;
+	font-family: var(--font-monospace);
+}
