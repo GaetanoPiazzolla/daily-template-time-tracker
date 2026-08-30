@@ -48,3 +48,57 @@
 	font-size: 12px;
 	font-family: var(--font-monospace);
 }
+
+/* Timer View (Sidebar) Styles */
+.dttt-view-empty {
+	text-align: center;
+	color: var(--text-muted);
+	padding: 40px 20px;
+	font-style: italic;
+	font-size: 1.1em;
+}
+
+.dttt-view-active {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 30px 20px;
+	gap: 20px;
+	height: 100%;
+}
+
+.dttt-view-active h3 {
+	margin: 0;
+	color: var(--text-normal);
+	font-size: 1.5em;
+	text-align: center;
+}
+
+.dttt-view-time {
+	font-size: 3.5em;
+	font-family: var(--font-monospace);
+	font-weight: bold;
+	color: var(--text-accent);
+	margin: 10px 0;
+	text-align: center;
+}
+
+.dttt-view-stop-btn {
+	background-color: var(--interactive-normal);
+	color: var(--text-error);
+	border: 1px solid var(--text-error);
+	padding: 12px 24px;
+	font-size: 1.1em;
+	font-weight: bold;
+	border-radius: var(--radius-m);
+	cursor: pointer;
+	width: 100%;
+	max-width: 200px;
+	transition: all 0.2s ease;
+}
+
+.dttt-view-stop-btn:hover {
+	background-color: var(--text-error);
+	color: var(--text-on-accent);
+}

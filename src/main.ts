@@ -1,6 +1,7 @@
-import { MarkdownView, Notice, Plugin } from "obsidian";
+import { MarkdownView, Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import { StateEffect } from "@codemirror/state";
 import { createTimerViewPlugin } from "./timer-view-plugin";
+import { TimerView, TIMER_VIEW_TYPE } from "./timer-view";
 import { TimerState, formatElapsedMinutes, formatElapsedDisplay, buildTimeField, extractExistingMinutes, extractHabitName, habitNameToFieldKey, extractTargetMinutes } from "./types";
 
 export const timerTickEffect = StateEffect.define<void>();
@@ -22,10 +23,51 @@ export default class DailyTemplateTimeTracker extends Plugin {
 		});
 
 		this.registerEditorExtension(viewPlugin);
+
+		// Register Sidebar View
+		this.registerView(TIMER_VIEW_TYPE, (leaf) => new TimerView(leaf, this));
+
+		this.addCommand({
+			id: "open-timer-view",
+			name: "Open Active Timer Panel",
+			callback: () => this.activateView()
+		});
+
+		this.addRibbonIcon("clock", "Open Active Timer", () => {
+			this.activateView();
+		});
+
+		this.app.workspace.onLayoutReady(() => {
+			this.activateView();
+		});
 	}
 
 	onunload(): void {
 		this.clearTick();
+	}
+
+	async activateView() {
+		const { workspace } = this.app;
+		
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(TIMER_VIEW_TYPE);
+		
+		if (leaves.length > 0) {
+			leaf = leaves[0];
+		} else {
+			leaf = workspace.getRightLeaf(false);
+			if (leaf) {
+				await leaf.setViewState({ type: TIMER_VIEW_TYPE, active: true });
+			}
+		}
+		
+		if (leaf) {
+			workspace.revealLeaf(leaf);
+		}
+	}
+
+	public getTimerState(): TimerState | null {
+		return this.timerState;
 	}
 
 	private startTimer(lineText: string, habitName: string): void {
@@ -50,10 +92,11 @@ export default class DailyTemplateTimeTracker extends Plugin {
 
 		this.startTick();
 		this.refreshEditors();
+		this.updateTimerView();
 		new Notice(`▶ Timer started: ${habitName}`);
 	}
 
-	private stopTimer(): void {
+	public stopTimer(): void {
 		if (!this.timerState) return;
 
 		const elapsedMs = Date.now() - this.timerState.startTime;
@@ -68,6 +111,7 @@ export default class DailyTemplateTimeTracker extends Plugin {
 		this.timerState = null;
 		this.clearTick();
 		this.updateStatusBar();
+		this.updateTimerView();
 
 		this.writeTimeToNote(targetFilePath, targetHabitName, timeField);
 		this.refreshEditors();
@@ -110,6 +154,7 @@ export default class DailyTemplateTimeTracker extends Plugin {
 			this.checkAutoCompletion();
 			this.updateStatusBar();
 			this.refreshEditors();
+			this.updateTimerView();
 		}, 1000);
 		this.registerInterval(this.tickInterval);
 	}
@@ -125,7 +170,6 @@ export default class DailyTemplateTimeTracker extends Plugin {
 		if (!this.timerState || this.timerState.targetMinutes === null) return;
 		
 		const elapsedMs = Date.now() - this.timerState.startTime;
-		// Use exact total seconds to determine if we crossed the minute threshold
 		const totalSeconds = Math.floor(elapsedMs / 1000) + (this.timerState.initialMinutes * 60);
 		const currentTotalMinutes = Math.floor(totalSeconds / 60);
 		
@@ -151,7 +195,6 @@ export default class DailyTemplateTimeTracker extends Plugin {
 				const lineHabit = extractHabitName(currentLine);
 				
 				if (lineHabit === targetHabitName) {
-					// Regex matches - [ ] or - [ ] with arbitrary whitespace before it
 					if (currentLine.match(/^(\s*)- \[\s\]/)) {
 						const newLine = currentLine.replace(/^(\s*)- \[\s\]/, "$1- [x]");
 						editor.setLine(i, newLine);
@@ -184,5 +227,14 @@ export default class DailyTemplateTimeTracker extends Plugin {
 				});
 			}
 		});
+	}
+
+	private updateTimerView(): void {
+		const leaves = this.app.workspace.getLeavesOfType(TIMER_VIEW_TYPE);
+		for (const leaf of leaves) {
+			if (leaf.view instanceof TimerView) {
+				leaf.view.render();
+			}
+		}
 	}
 }
