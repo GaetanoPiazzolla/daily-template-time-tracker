@@ -16,6 +16,24 @@ While this plugin works standalone for tracking time, to fully utilize the data 
 - **[Dataview](https://github.com/blacksmithgu/obsidian-dataview)** (Community Plugin): Required to parse the inline time fields and build the habits dashboard. Make sure to enable JavaScript queries in Dataview settings if you plan to use DataviewJS.
 - **[Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks)** (Community Plugin): Highly recommended for querying and organizing your TODOs across different daily notes and projects.
 
+## Installation
+
+Since this plugin is not yet available in the official Obsidian Community Plugins directory, you can install it manually or via BRAT.
+
+### Option 1: Using BRAT (Recommended)
+1. Install the **[BRAT](https://github.com/TfTHacker/obsidian42-brat)** plugin from the Obsidian Community Plugins.
+2. Enable BRAT in your settings.
+3. Open the command palette (`Ctrl/Cmd + P`) and run **BRAT: Add a beta plugin for testing**.
+4. Paste the URL of this repository: `https://github.com/GaetanoPiazzolla/daily-template-time-tracker`
+5. Enable the plugin in your Community Plugins settings.
+
+### Option 2: Manual Installation
+1. Go to the [Releases](https://github.com/GaetanoPiazzolla/daily-template-time-tracker/releases) page of this repository.
+2. Download `main.js`, `manifest.json`, and `styles.css` from the latest release.
+3. In your Obsidian vault, navigate to the `.obsidian/plugins/` folder and create a new folder named `daily-template-time-tracker`.
+4. Move the three downloaded files into that folder.
+5. Reload Obsidian (or click the reload button in the Community Plugins tab) and enable **Daily Template Time Tracker**.
+
 ## How to Use
 
 ### 1. Set up your Daily Template
