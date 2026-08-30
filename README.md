@@ -9,6 +9,11 @@ A custom Obsidian plugin to seamlessly track time spent on daily habits directly
 - **Sidebar Panel**: Keep track of your active timer in a dedicated sidebar view with a large countdown.
 - **Dataview Integration**: Automatically writes the elapsed time (e.g., `[meditazione-time:: 30m 20s]`) for easy dashboard aggregation, streaks, and check counts.
 
+## Prerequisites
+
+While this plugin works standalone for tracking time, to fully utilize the data and build dashboards, you must install:
+- **[Dataview](https://github.com/blacksmithgu/obsidian-dataview)** (Community Plugin): Required to parse the inline time fields and build the habits dashboard. Make sure to enable JavaScript queries in Dataview settings if you plan to use DataviewJS.
+
 ## How to Use
 
 ### 1. Set up your Daily Template
