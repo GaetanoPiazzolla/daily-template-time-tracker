@@ -167,12 +167,9 @@ export default class DailyTemplateTimeTracker extends Plugin {
 	private updateStatusBar(): void {
 		if (!this.statusBarEl) return;
 		if (this.timerState) {
-			const elapsed = formatElapsedDisplay(Date.now() - this.timerState.startTime, this.timerState.initialMinutes);
-			let targetDisplay = "";
-			if (this.timerState.targetMinutes !== null) {
-				targetDisplay = ` / ${this.timerState.targetMinutes}:00`;
-			}
-			this.statusBarEl.textContent = `⏱️ ${this.timerState.habitName} ${elapsed}${targetDisplay}`;
+			const elapsed = formatElapsedDisplay(Date.now() - this.timerState.startTime, this.timerState.initialMinutes, this.timerState.targetMinutes);
+			const icon = this.timerState.targetMinutes !== null ? "⏳" : "⏱️";
+			this.statusBarEl.textContent = `${icon} ${this.timerState.habitName} ${elapsed}`;
 		} else {
 			this.statusBarEl.textContent = "";
 		}

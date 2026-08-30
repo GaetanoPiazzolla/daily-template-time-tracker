@@ -48,6 +48,7 @@ export function createTimerViewPlugin(deps: ViewPluginDeps) {
 								const isRunning = timerState !== null && timerState.habitName === habitName;
 								const elapsed = isRunning ? Date.now() - timerState!.startTime : 0;
 								const initialMinutes = isRunning ? timerState!.initialMinutes : 0;
+								const targetMinutes = isRunning ? timerState!.targetMinutes : null;
 
 								builder.add(
 									line.to,
@@ -57,7 +58,7 @@ export function createTimerViewPlugin(deps: ViewPluginDeps) {
 											lineText: line.text,
 											habitName,
 											isRunning,
-											elapsedDisplay: formatElapsedDisplay(elapsed, initialMinutes),
+											elapsedDisplay: formatElapsedDisplay(elapsed, initialMinutes, targetMinutes),
 											onStart: deps.onStart,
 											onStop: deps.onStop,
 										}),
