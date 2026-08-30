@@ -48,7 +48,7 @@ export class TimerView extends ItemView {
 		
 		wrapper.createEl("h3", { text: state.habitName });
 		
-		const elapsed = formatElapsedDisplay(Date.now() - state.startTime, state.initialMinutes, state.targetMinutes);
+		const elapsed = formatElapsedDisplay(Date.now() - state.startTime, state.initialSeconds, state.targetMinutes);
 		wrapper.createEl("div", { cls: "dttt-view-time", text: elapsed });
 		
 		const stopBtn = wrapper.createEl("button", { cls: "dttt-view-stop-btn", text: "⏹ Ferma Timer" });

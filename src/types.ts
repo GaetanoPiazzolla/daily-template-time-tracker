@@ -3,7 +3,7 @@ export interface TimerState {
 	lineText: string;
 	habitName: string;
 	startTime: number;
-	initialMinutes: number;
+	initialSeconds: number;
 	targetMinutes: number | null;
 }
 
@@ -25,19 +25,33 @@ export function habitNameToFieldKey(habitName: string): string {
 		.replace(/[^a-z0-9-]/g, "");
 }
 
-export function extractExistingMinutes(lineText: string, habitName: string): number {
+export function extractExistingSeconds(lineText: string, habitName: string): number {
 	const key = habitNameToFieldKey(habitName);
-	const regex = new RegExp(`\\[${key}-time::\\s*(\\d+)m?\\]`);
+	const regex = new RegExp(`\\[${key}-time::\\s*(.*?)\\]`);
 	const match = lineText.match(regex);
-	return match ? parseInt(match[1], 10) : 0;
+	if (!match) return 0;
+	
+	const timeStr = match[1];
+	let totalSeconds = 0;
+	
+	const hMatch = timeStr.match(/(\d+)h/);
+	if (hMatch) totalSeconds += parseInt(hMatch[1], 10) * 3600;
+	
+	const mMatch = timeStr.match(/(\d+)m/);
+	if (mMatch) totalSeconds += parseInt(mMatch[1], 10) * 60;
+	
+	const sMatch = timeStr.match(/(\d+)s/);
+	if (sMatch) totalSeconds += parseInt(sMatch[1], 10);
+	
+	if (totalSeconds === 0 && /^\d+$/.test(timeStr.trim())) {
+		totalSeconds = parseInt(timeStr.trim(), 10) * 60;
+	}
+	
+	return totalSeconds;
 }
 
-export function formatElapsedMinutes(ms: number): number {
-	return Math.round(ms / 60000);
-}
-
-export function formatElapsedDisplay(ms: number, initialMinutes: number = 0, targetMinutes: number | null = null): string {
-	const totalSeconds = Math.floor(ms / 1000) + (initialMinutes * 60);
+export function formatElapsedDisplay(ms: number, initialSeconds: number = 0, targetMinutes: number | null = null): string {
+	const totalSeconds = Math.floor(ms / 1000) + initialSeconds;
 	
 	if (targetMinutes !== null) {
 		const targetSeconds = targetMinutes * 60;
@@ -47,7 +61,7 @@ export function formatElapsedDisplay(ms: number, initialMinutes: number = 0, tar
 			const rSec = remainingSeconds % 60;
 			return `-${String(rMin).padStart(2, "0")}:${String(rSec).padStart(2, "0")}`;
 		} else {
-			return "00:00"; // Reached
+			return "00:00"; 
 		}
 	}
 	
@@ -56,7 +70,17 @@ export function formatElapsedDisplay(ms: number, initialMinutes: number = 0, tar
 	return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-export function buildTimeField(habitName: string, minutes: number): string {
+export function buildTimeField(habitName: string, totalSeconds: number): string {
 	const key = habitNameToFieldKey(habitName);
-	return `[${key}-time:: ${minutes}m]`;
+	let timeStr = "";
+	
+	const hours = Math.floor(totalSeconds / 3600);
+	const minutes = Math.floor((totalSeconds % 3600) / 60);
+	const seconds = totalSeconds % 60;
+	
+	if (hours > 0) timeStr += `${hours}h `;
+	if (minutes > 0 || hours > 0) timeStr += `${minutes}m `;
+	timeStr += `${seconds}s`;
+	
+	return `[${key}-time:: ${timeStr.trim()}]`;
 }

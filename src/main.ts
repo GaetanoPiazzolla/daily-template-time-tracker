@@ -2,7 +2,7 @@ import { MarkdownView, Notice, Plugin, WorkspaceLeaf } from "obsidian";
 import { StateEffect } from "@codemirror/state";
 import { createTimerViewPlugin } from "./timer-view-plugin";
 import { TimerView, TIMER_VIEW_TYPE } from "./timer-view";
-import { TimerState, formatElapsedMinutes, formatElapsedDisplay, buildTimeField, extractExistingMinutes, extractHabitName, habitNameToFieldKey, extractTargetMinutes } from "./types";
+import { TimerState, formatElapsedDisplay, buildTimeField, extractExistingSeconds, extractHabitName, habitNameToFieldKey, extractTargetMinutes } from "./types";
 
 export const timerTickEffect = StateEffect.define<void>();
 
@@ -24,7 +24,6 @@ export default class DailyTemplateTimeTracker extends Plugin {
 
 		this.registerEditorExtension(viewPlugin);
 
-		// Register Sidebar View
 		this.registerView(TIMER_VIEW_TYPE, (leaf) => new TimerView(leaf, this));
 
 		this.addCommand({
@@ -78,7 +77,7 @@ export default class DailyTemplateTimeTracker extends Plugin {
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!activeView?.file) return;
 		
-		const initialMinutes = extractExistingMinutes(lineText, habitName);
+		const initialSeconds = extractExistingSeconds(lineText, habitName);
 		const targetMinutes = extractTargetMinutes(lineText);
 
 		this.timerState = {
@@ -86,7 +85,7 @@ export default class DailyTemplateTimeTracker extends Plugin {
 			lineText,
 			habitName,
 			startTime: Date.now(),
-			initialMinutes,
+			initialSeconds,
 			targetMinutes
 		};
 
@@ -100,10 +99,10 @@ export default class DailyTemplateTimeTracker extends Plugin {
 		if (!this.timerState) return;
 
 		const elapsedMs = Date.now() - this.timerState.startTime;
-		const sessionMinutes = formatElapsedMinutes(elapsedMs);
-		const totalMinutes = this.timerState.initialMinutes + sessionMinutes;
+		const sessionSeconds = Math.floor(elapsedMs / 1000);
+		const totalSeconds = this.timerState.initialSeconds + sessionSeconds;
 		
-		const timeField = buildTimeField(this.timerState.habitName, totalMinutes);
+		const timeField = buildTimeField(this.timerState.habitName, totalSeconds);
 		const habitName = this.timerState.habitName;
 		const targetFilePath = this.timerState.filePath;
 		const targetHabitName = this.timerState.habitName;
@@ -115,7 +114,7 @@ export default class DailyTemplateTimeTracker extends Plugin {
 
 		this.writeTimeToNote(targetFilePath, targetHabitName, timeField);
 		this.refreshEditors();
-		new Notice(`⏹ ${habitName}: ${totalMinutes}m total recorded`);
+		new Notice(`⏹ ${habitName} timer registrato.`);
 	}
 
 	private writeTimeToNote(filePath: string, targetHabitName: string, timeField: string): void {
@@ -128,7 +127,8 @@ export default class DailyTemplateTimeTracker extends Plugin {
 			const lineCount = editor.lineCount();
 			
 			const key = habitNameToFieldKey(targetHabitName);
-			const regex = new RegExp(` *\\[${key}-time::\\s*\\d+m?\\]`);
+			// Match anything inside the time field instead of just digits and 'm'
+			const regex = new RegExp(` *\\[${key}-time::.*?\\]`);
 
 			for (let i = 0; i < lineCount; i++) {
 				const currentLine = editor.getLine(i);
@@ -170,7 +170,7 @@ export default class DailyTemplateTimeTracker extends Plugin {
 		if (!this.timerState || this.timerState.targetMinutes === null) return;
 		
 		const elapsedMs = Date.now() - this.timerState.startTime;
-		const totalSeconds = Math.floor(elapsedMs / 1000) + (this.timerState.initialMinutes * 60);
+		const totalSeconds = Math.floor(elapsedMs / 1000) + this.timerState.initialSeconds;
 		const currentTotalMinutes = Math.floor(totalSeconds / 60);
 		
 		if (currentTotalMinutes >= this.timerState.targetMinutes) {
@@ -210,7 +210,7 @@ export default class DailyTemplateTimeTracker extends Plugin {
 	private updateStatusBar(): void {
 		if (!this.statusBarEl) return;
 		if (this.timerState) {
-			const elapsed = formatElapsedDisplay(Date.now() - this.timerState.startTime, this.timerState.initialMinutes, this.timerState.targetMinutes);
+			const elapsed = formatElapsedDisplay(Date.now() - this.timerState.startTime, this.timerState.initialSeconds, this.timerState.targetMinutes);
 			const icon = this.timerState.targetMinutes !== null ? "⏳" : "⏱️";
 			this.statusBarEl.textContent = `${icon} ${this.timerState.habitName} ${elapsed}`;
 		} else {
