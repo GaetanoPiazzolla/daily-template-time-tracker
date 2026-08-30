@@ -1,7 +1,7 @@
 import { MarkdownView, Notice, Plugin } from "obsidian";
 import { StateEffect } from "@codemirror/state";
 import { createTimerViewPlugin } from "./timer-view-plugin";
-import { TimerState, formatElapsedMinutes, formatElapsedDisplay, buildTimeField, extractExistingMinutes, extractHabitName, habitNameToFieldKey } from "./types";
+import { TimerState, formatElapsedMinutes, formatElapsedDisplay, buildTimeField, extractExistingMinutes, extractHabitName, habitNameToFieldKey, extractTargetMinutes } from "./types";
 
 export const timerTickEffect = StateEffect.define<void>();
 
@@ -37,13 +37,15 @@ export default class DailyTemplateTimeTracker extends Plugin {
 		if (!activeView?.file) return;
 		
 		const initialMinutes = extractExistingMinutes(lineText, habitName);
+		const targetMinutes = extractTargetMinutes(lineText);
 
 		this.timerState = {
 			filePath: activeView.file.path,
 			lineText,
 			habitName,
 			startTime: Date.now(),
-			initialMinutes
+			initialMinutes,
+			targetMinutes
 		};
 
 		this.startTick();
@@ -105,6 +107,7 @@ export default class DailyTemplateTimeTracker extends Plugin {
 	private startTick(): void {
 		this.clearTick();
 		this.tickInterval = window.setInterval(() => {
+			this.checkAutoCompletion();
 			this.updateStatusBar();
 			this.refreshEditors();
 		}, 1000);
@@ -117,12 +120,59 @@ export default class DailyTemplateTimeTracker extends Plugin {
 			this.tickInterval = null;
 		}
 	}
+	
+	private checkAutoCompletion(): void {
+		if (!this.timerState || this.timerState.targetMinutes === null) return;
+		
+		const elapsedMs = Date.now() - this.timerState.startTime;
+		// Use exact total seconds to determine if we crossed the minute threshold
+		const totalSeconds = Math.floor(elapsedMs / 1000) + (this.timerState.initialMinutes * 60);
+		const currentTotalMinutes = Math.floor(totalSeconds / 60);
+		
+		if (currentTotalMinutes >= this.timerState.targetMinutes) {
+			this.autoCheckCurrentTask();
+		}
+	}
+	
+	private autoCheckCurrentTask(): void {
+		const filePath = this.timerState!.filePath;
+		const targetHabitName = this.timerState!.habitName;
+		
+		const leaves = this.app.workspace.getLeavesOfType("markdown");
+		for (const leaf of leaves) {
+			const view = leaf.view;
+			if (!(view instanceof MarkdownView) || view.file?.path !== filePath) continue;
+
+			const editor = view.editor;
+			const lineCount = editor.lineCount();
+			
+			for (let i = 0; i < lineCount; i++) {
+				const currentLine = editor.getLine(i);
+				const lineHabit = extractHabitName(currentLine);
+				
+				if (lineHabit === targetHabitName) {
+					// Regex matches - [ ] or - [ ] with arbitrary whitespace before it
+					if (currentLine.match(/^(\s*)- \[\s\]/)) {
+						const newLine = currentLine.replace(/^(\s*)- \[\s\]/, "$1- [x]");
+						editor.setLine(i, newLine);
+						this.timerState!.lineText = newLine;
+						new Notice(`✅ Obiettivo raggiunto: ${targetHabitName} completato!`);
+					}
+					return;
+				}
+			}
+		}
+	}
 
 	private updateStatusBar(): void {
 		if (!this.statusBarEl) return;
 		if (this.timerState) {
 			const elapsed = formatElapsedDisplay(Date.now() - this.timerState.startTime, this.timerState.initialMinutes);
-			this.statusBarEl.textContent = `⏱️ ${this.timerState.habitName} ${elapsed}`;
+			let targetDisplay = "";
+			if (this.timerState.targetMinutes !== null) {
+				targetDisplay = ` / ${this.timerState.targetMinutes}:00`;
+			}
+			this.statusBarEl.textContent = `⏱️ ${this.timerState.habitName} ${elapsed}${targetDisplay}`;
 		} else {
 			this.statusBarEl.textContent = "";
 		}
@@ -131,7 +181,6 @@ export default class DailyTemplateTimeTracker extends Plugin {
 	private refreshEditors(): void {
 		this.app.workspace.iterateAllLeaves((leaf) => {
 			if (leaf.view instanceof MarkdownView) {
-				// Safely dispatch the effect to trigger a UI update in CM6
 				// @ts-ignore
 				leaf.view.editor.cm?.dispatch({
 					effects: timerTickEffect.of()

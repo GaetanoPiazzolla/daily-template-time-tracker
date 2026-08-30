@@ -4,12 +4,18 @@ export interface TimerState {
 	habitName: string;
 	startTime: number;
 	initialMinutes: number;
+	targetMinutes: number | null;
 }
 
 export function extractHabitName(lineText: string): string | null {
-	const match = lineText.match(/- \[.\]\s+\S+\s+\*{0,2}(.+?)\*{0,2}.*#timed/);
+	const match = lineText.match(/- \[[ xX]\]\s+\S+\s+\*{0,2}(.+?)\*{0,2}.*#timed/);
 	if (!match) return null;
 	return match[1].trim();
+}
+
+export function extractTargetMinutes(lineText: string): number | null {
+	const match = lineText.match(/#timed-(\d+)/);
+	return match ? parseInt(match[1], 10) : null;
 }
 
 export function habitNameToFieldKey(habitName: string): string {
