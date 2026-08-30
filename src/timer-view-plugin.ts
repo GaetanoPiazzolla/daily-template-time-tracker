@@ -5,7 +5,7 @@ import { TimerButtonWidget } from "./timer-widget";
 import { extractHabitName, TimerState, formatElapsedDisplay } from "./types";
 import { timerTickEffect } from "./main";
 
-const DAILY_TASK_REGEX = /^(\s*[-*+])\s+\[(.)\].*#daily/;
+const DAILY_TASK_REGEX = /^(\s*[-*+])\s+\[(.)\].*#timed/;
 
 export interface ViewPluginDeps {
 	getTimerState: () => TimerState | null;

@@ -7,7 +7,7 @@ export interface TimerState {
 }
 
 export function extractHabitName(lineText: string): string | null {
-	const match = lineText.match(/- \[.\]\s+\S+\s+\*{0,2}(.+?)\*{0,2}\s+#daily/);
+	const match = lineText.match(/- \[.\]\s+\S+\s+\*{0,2}(.+?)\*{0,2}.*#timed/);
 	if (!match) return null;
 	return match[1].trim();
 }
