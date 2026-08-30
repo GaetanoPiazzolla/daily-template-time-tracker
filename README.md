@@ -11,14 +11,15 @@ A custom Obsidian plugin to seamlessly track time spent on daily habits directly
 
 ## Prerequisites
 
-While this plugin works standalone for tracking time, to fully utilize the data and build robust dashboards, you must install:
+While this plugin works standalone for tracking time, to fully utilize the data and build robust dashboards, you must set up the following:
+- **Daily Notes & Templates** (Obsidian Core Plugins): Ensure these are enabled in your core settings. Configure the Daily Notes plugin to use your template file so new daily notes are automatically generated with your habits checklist.
 - **[Dataview](https://github.com/blacksmithgu/obsidian-dataview)** (Community Plugin): Required to parse the inline time fields and build the habits dashboard. Make sure to enable JavaScript queries in Dataview settings if you plan to use DataviewJS.
 - **[Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks)** (Community Plugin): Highly recommended for querying and organizing your TODOs across different daily notes and projects.
 
 ## How to Use
 
 ### 1. Set up your Daily Template
-Create a checklist for your habits in your daily template. Add the tag `#timed` to any habit you want to track time for. If you have a specific time goal (e.g., 30 minutes), use `#timed-30`. For habits that don't need time tracking, just use a standard tag like `#daily`.
+Create a checklist for your habits in your daily template file. Add the tag `#timed` to any habit you want to track time for. If you have a specific time goal (e.g., 30 minutes), use `#timed-30`. For habits that don't need time tracking, just use a standard tag like `#daily`.
 
 ![Daily Template Note](assets/template.png)
 
@@ -29,6 +30,8 @@ Create a checklist for your habits in your daily template. Add the tag `#timed` 
 - [ ] 🎶 **Guitar** #timed-30
 - [ ] 🍽️ **Conscious Nutrition** #daily
 ```
+
+*Every time you create a new daily note using this template, your fresh habits list will be ready to go.*
 
 ### 2. Track your Time
 When you open a note with these tasks in **Live Preview**, a ▶️ button will appear next to the `#timed` tags. 
