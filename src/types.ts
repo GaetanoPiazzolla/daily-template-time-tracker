@@ -61,7 +61,10 @@ export function formatElapsedDisplay(ms: number, initialSeconds: number = 0, tar
 			const rSec = remainingSeconds % 60;
 			return `-${String(rMin).padStart(2, "0")}:${String(rSec).padStart(2, "0")}`;
 		} else {
-			return "00:00"; 
+			const overSeconds = Math.abs(remainingSeconds);
+			const oMin = Math.floor(overSeconds / 60);
+			const oSec = overSeconds % 60;
+			return `+${String(oMin).padStart(2, "0")}:${String(oSec).padStart(2, "0")}`;
 		}
 	}
 	
