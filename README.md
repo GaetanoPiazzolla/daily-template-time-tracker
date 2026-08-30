@@ -37,8 +37,12 @@ When you open a note with these tasks in **Live Preview**, a ▶️ button will 
 - The sidebar panel will automatically update to show your active session.
 - Click ⏹️ to stop. The plugin will append a Dataview inline field (like `[deep-work-time:: 30m 22s]`) to the line.
 
+![Main View](assets/main_view.png)
+
 ### 3. Build your Dashboard
 The true power of this format is querying it with Dataview. You can build a dashboard that calculates your total time spent, completion counts, and streaks (current and max) for *all* habits.
+
+![Habits Dashboard](assets/dataview_dashboard.png)
 
 *Note: For the cleanest look in your notes, we recommend going to **Settings > Dataview** and turning OFF "Enable Inline Field Highlighting". This keeps your time fields looking like regular text.*
 
