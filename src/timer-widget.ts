@@ -30,7 +30,13 @@ export class TimerButtonWidget extends WidgetType {
 		btn.className = `dttt-timer-btn ${this.config.isRunning ? "dttt-running" : ""}`;
 		btn.type = "button";
 		btn.setAttribute("aria-label", this.config.isRunning ? "Stop timer" : "Start timer");
-		btn.textContent = this.config.isRunning ? "⏹" : "▶";
+		
+		// Use identical SVG structure for consistent styling
+		if (this.config.isRunning) {
+			btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
+		} else {
+			btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>`;
+		}
 
 		btn.addEventListener("click", (e) => {
 			e.preventDefault();

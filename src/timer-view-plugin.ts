@@ -3,6 +3,7 @@ import { RangeSetBuilder } from "@codemirror/state";
 import { editorLivePreviewField } from "obsidian";
 import { TimerButtonWidget } from "./timer-widget";
 import { extractHabitName, TimerState, formatElapsedDisplay } from "./types";
+import { timerTickEffect } from "./main";
 
 const DAILY_TASK_REGEX = /^(\s*[-*+])\s+\[(.)\].*#daily/;
 
@@ -22,7 +23,8 @@ export function createTimerViewPlugin(deps: ViewPluginDeps) {
 			}
 
 			update(update: ViewUpdate): void {
-				if (update.docChanged || update.viewportChanged || update.selectionSet) {
+				const isTick = update.transactions.some(tr => tr.effects.some(e => e.is(timerTickEffect)));
+				if (update.docChanged || update.viewportChanged || update.selectionSet || isTick) {
 					this.decorations = this.buildDecorations(update.view);
 				}
 			}
@@ -43,8 +45,9 @@ export function createTimerViewPlugin(deps: ViewPluginDeps) {
 						if (match) {
 							const habitName = extractHabitName(line.text);
 							if (habitName) {
-								const isRunning = timerState !== null && timerState.lineText === line.text;
+								const isRunning = timerState !== null && timerState.habitName === habitName;
 								const elapsed = isRunning ? Date.now() - timerState!.startTime : 0;
+								const initialMinutes = isRunning ? timerState!.initialMinutes : 0;
 
 								builder.add(
 									line.to,
@@ -54,7 +57,7 @@ export function createTimerViewPlugin(deps: ViewPluginDeps) {
 											lineText: line.text,
 											habitName,
 											isRunning,
-											elapsedDisplay: formatElapsedDisplay(elapsed),
+											elapsedDisplay: formatElapsedDisplay(elapsed, initialMinutes),
 											onStart: deps.onStart,
 											onStop: deps.onStop,
 										}),

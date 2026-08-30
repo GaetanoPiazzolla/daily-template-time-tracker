@@ -3,6 +3,7 @@ export interface TimerState {
 	lineText: string;
 	habitName: string;
 	startTime: number;
+	initialMinutes: number;
 }
 
 export function extractHabitName(lineText: string): string | null {
@@ -18,12 +19,19 @@ export function habitNameToFieldKey(habitName: string): string {
 		.replace(/[^a-z0-9-]/g, "");
 }
 
-export function formatElapsedMinutes(ms: number): number {
-	return Math.max(1, Math.round(ms / 60000));
+export function extractExistingMinutes(lineText: string, habitName: string): number {
+	const key = habitNameToFieldKey(habitName);
+	const regex = new RegExp(`\\[${key}-time::\\s*(\\d+)m?\\]`);
+	const match = lineText.match(regex);
+	return match ? parseInt(match[1], 10) : 0;
 }
 
-export function formatElapsedDisplay(ms: number): string {
-	const totalSeconds = Math.floor(ms / 1000);
+export function formatElapsedMinutes(ms: number): number {
+	return Math.round(ms / 60000);
+}
+
+export function formatElapsedDisplay(ms: number, initialMinutes: number = 0): string {
+	const totalSeconds = Math.floor(ms / 1000) + (initialMinutes * 60);
 	const minutes = Math.floor(totalSeconds / 60);
 	const seconds = totalSeconds % 60;
 	return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;

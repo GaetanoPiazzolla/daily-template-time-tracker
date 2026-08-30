@@ -1,6 +1,9 @@
 import { MarkdownView, Notice, Plugin } from "obsidian";
+import { StateEffect } from "@codemirror/state";
 import { createTimerViewPlugin } from "./timer-view-plugin";
-import { TimerState, formatElapsedMinutes, formatElapsedDisplay, buildTimeField } from "./types";
+import { TimerState, formatElapsedMinutes, formatElapsedDisplay, buildTimeField, extractExistingMinutes, extractHabitName, habitNameToFieldKey } from "./types";
+
+export const timerTickEffect = StateEffect.define<void>();
 
 export default class DailyTemplateTimeTracker extends Plugin {
 	private timerState: TimerState | null = null;
@@ -32,12 +35,15 @@ export default class DailyTemplateTimeTracker extends Plugin {
 
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!activeView?.file) return;
+		
+		const initialMinutes = extractExistingMinutes(lineText, habitName);
 
 		this.timerState = {
 			filePath: activeView.file.path,
 			lineText,
 			habitName,
 			startTime: Date.now(),
+			initialMinutes
 		};
 
 		this.startTick();
@@ -48,23 +54,25 @@ export default class DailyTemplateTimeTracker extends Plugin {
 	private stopTimer(): void {
 		if (!this.timerState) return;
 
-		const elapsed = Date.now() - this.timerState.startTime;
-		const minutes = formatElapsedMinutes(elapsed);
-		const timeField = buildTimeField(this.timerState.habitName, minutes);
+		const elapsedMs = Date.now() - this.timerState.startTime;
+		const sessionMinutes = formatElapsedMinutes(elapsedMs);
+		const totalMinutes = this.timerState.initialMinutes + sessionMinutes;
+		
+		const timeField = buildTimeField(this.timerState.habitName, totalMinutes);
 		const habitName = this.timerState.habitName;
-		const targetLineText = this.timerState.lineText;
 		const targetFilePath = this.timerState.filePath;
+		const targetHabitName = this.timerState.habitName;
 
 		this.timerState = null;
 		this.clearTick();
 		this.updateStatusBar();
 
-		this.writeTimeToNote(targetFilePath, targetLineText, timeField);
+		this.writeTimeToNote(targetFilePath, targetHabitName, timeField);
 		this.refreshEditors();
-		new Notice(`⏹ ${habitName}: ${minutes}m recorded`);
+		new Notice(`⏹ ${habitName}: ${totalMinutes}m total recorded`);
 	}
 
-	private writeTimeToNote(filePath: string, lineText: string, timeField: string): void {
+	private writeTimeToNote(filePath: string, targetHabitName: string, timeField: string): void {
 		const leaves = this.app.workspace.getLeavesOfType("markdown");
 		for (const leaf of leaves) {
 			const view = leaf.view;
@@ -72,13 +80,22 @@ export default class DailyTemplateTimeTracker extends Plugin {
 
 			const editor = view.editor;
 			const lineCount = editor.lineCount();
+			
+			const key = habitNameToFieldKey(targetHabitName);
+			const regex = new RegExp(` *\\[${key}-time::\\s*\\d+m?\\]`);
 
 			for (let i = 0; i < lineCount; i++) {
 				const currentLine = editor.getLine(i);
-				if (currentLine === lineText) {
-					const fieldKey = timeField.match(/\[(.+?):: /)?.[1];
-					if (fieldKey && currentLine.includes(`[${fieldKey}::`)) return;
-					editor.setLine(i, `${currentLine} ${timeField}`);
+				const lineHabit = extractHabitName(currentLine);
+				
+				if (lineHabit === targetHabitName) {
+					let newLine = currentLine;
+					if (regex.test(currentLine)) {
+						newLine = currentLine.replace(regex, ` ${timeField}`);
+					} else {
+						newLine = `${currentLine} ${timeField}`;
+					}
+					editor.setLine(i, newLine);
 					return;
 				}
 			}
@@ -104,7 +121,7 @@ export default class DailyTemplateTimeTracker extends Plugin {
 	private updateStatusBar(): void {
 		if (!this.statusBarEl) return;
 		if (this.timerState) {
-			const elapsed = formatElapsedDisplay(Date.now() - this.timerState.startTime);
+			const elapsed = formatElapsedDisplay(Date.now() - this.timerState.startTime, this.timerState.initialMinutes);
 			this.statusBarEl.textContent = `⏱️ ${this.timerState.habitName} ${elapsed}`;
 		} else {
 			this.statusBarEl.textContent = "";
@@ -114,8 +131,11 @@ export default class DailyTemplateTimeTracker extends Plugin {
 	private refreshEditors(): void {
 		this.app.workspace.iterateAllLeaves((leaf) => {
 			if (leaf.view instanceof MarkdownView) {
-				// @ts-ignore — force CM6 to rebuild decorations
-				leaf.view.editor.cm?.dispatch();
+				// Safely dispatch the effect to trigger a UI update in CM6
+				// @ts-ignore
+				leaf.view.editor.cm?.dispatch({
+					effects: timerTickEffect.of()
+				});
 			}
 		});
 	}
