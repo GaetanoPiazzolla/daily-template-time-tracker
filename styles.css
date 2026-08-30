@@ -102,3 +102,21 @@
 	background-color: var(--text-error);
 	color: var(--text-on-accent);
 }
+
+/* --- Spaziatura per le abitudini (Padding sotto le note) --- */
+
+/* Live Preview: Aggiunge spazio prima di ogni checkbox che contiene i tag delle abitudini */
+.markdown-source-view.mod-cm6 .cm-line:has(input[type="checkbox"]):has([class*="cm-tag-timed"]),
+.markdown-source-view.mod-cm6 .cm-line:has(input[type="checkbox"]):has(.cm-tag-daily) {
+	padding-top: 24px;
+}
+/* Rimuove il padding dal primo elemento per evitare spazio vuoto in alto */
+.markdown-source-view.mod-cm6 .cm-line:first-child:has(input[type="checkbox"]) {
+	padding-top: 0;
+}
+
+/* Reading View: Stessa logica per la modalità lettura */
+.markdown-rendered li:has(> input[type="checkbox"]):has(a.tag[href^="#timed"]),
+.markdown-rendered li:has(> input[type="checkbox"]):has(a.tag[href="#daily"]) {
+	margin-top: 24px;
+}
