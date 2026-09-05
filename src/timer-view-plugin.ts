@@ -3,7 +3,7 @@ import { RangeSetBuilder } from "@codemirror/state";
 import { editorLivePreviewField } from "obsidian";
 import { TimerButtonWidget } from "./timer-widget";
 import { extractHabitName, TimerState, formatElapsedDisplay } from "./types";
-import { timerTickEffect } from "./main";
+import { timerTickEffect, playDingSound } from "./main";
 
 const DAILY_TASK_REGEX = /^(\s*[-*+])\s+\[(.)\].*#timed/;
 
@@ -23,6 +23,27 @@ export function createTimerViewPlugin(deps: ViewPluginDeps) {
 			}
 
 			update(update: ViewUpdate): void {
+				if (update.docChanged) {
+					update.changes.iterChanges((fromA, toA, fromB, toB) => {
+						const oldLine = update.startState.doc.lineAt(fromA);
+						const newLine = update.state.doc.lineAt(fromB);
+
+						if (oldLine.number === update.startState.doc.lineAt(toA).number && 
+							newLine.number === update.state.doc.lineAt(toB).number) {
+							
+							const oldText = oldLine.text;
+							const newText = newLine.text;
+							
+							const wasUnchecked = oldText.match(/^(\s*[-*+])\s+\[ \]/);
+							const isChecked = newText.match(/^(\s*[-*+])\s+\[[xX]\]/);
+							
+							if (wasUnchecked && isChecked) {
+								setTimeout(() => playDingSound(), 10);
+							}
+						}
+					});
+				}
+
 				const isTick = update.transactions.some(tr => tr.effects.some(e => e.is(timerTickEffect)));
 				if (update.docChanged || update.viewportChanged || update.selectionSet || isTick) {
 					this.decorations = this.buildDecorations(update.view);

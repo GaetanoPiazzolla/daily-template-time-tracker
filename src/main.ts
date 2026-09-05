@@ -7,7 +7,7 @@ import { TimerState, formatElapsedDisplay, buildTimeField, extractExistingSecond
 export const timerTickEffect = StateEffect.define<void>();
 
 
-function playDingSound() {
+export function playDingSound() {
 	try {
 		const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
 		const ctx = new AudioContext();
@@ -242,7 +242,6 @@ export default class DailyTemplateTimeTracker extends Plugin {
 						editor.setLine(i, newLine);
 						this.timerState!.lineText = newLine;
 						new Notice(`✅ Obiettivo raggiunto: ${targetHabitName} completato!`);
-						playDingSound();
 					}
 					return;
 				}

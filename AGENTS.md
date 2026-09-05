@@ -23,8 +23,10 @@ npm install
 npm run build          # tsc check + esbuild production bundle → main.js
 npm run dev            # esbuild watch mode
 ```
-Deploy by copying `main.js`, `manifest.json`, `styles.css` to `.obsidian/plugins/daily-template-time-tracker/`.
-
+Deploy by copying the compiled files to your specific Obsidian vault:
+```bash
+cp main.js manifest.json styles.css /path/to/your/obsidian/vault/.obsidian/plugins/daily-template-time-tracker/
+```
 ## Conventions
 - Target lines match: `- [ ] ... #daily` or `- [x] ... #daily`
 - Habit name extracted from pattern: `- [.] EMOJI **HabitName** #daily`
