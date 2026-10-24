@@ -5,8 +5,11 @@ A custom Obsidian plugin to seamlessly track time spent on daily habits directly
 ## Features
 
 - **Inline Timers**: Adds a play/stop button right next to your tasks tagged with `#timed`.
-- **Target Countdowns & Auto-Check**: Use `#timed-20` to set a 20-minute goal. The timer will show a countdown and automatically check the box (`- [x]`) when the goal is reached. Overtime is tracked automatically.
-- **Sidebar Panel**: Keep track of your active timer in a dedicated sidebar view with a large countdown.
+- **Target Countdowns & Auto-Check**: Use `#timed-20` to set a 20-minute goal. The timer shows a countdown and checks the box (`- [x]`) when the goal is reached. The target is a goal, not a limit: the timer keeps running and the display rolls over to `+MM:SS`, so overtime is tracked too.
+- **Sidebar Panel**: Follow the active timer on a large countdown — and when nothing is running, the panel lists today's `#timed` tasks with their logged time, so you can start one straight from there.
+- **No Note Required**: Stop a timer from the panel even if the daily note is closed; the time is written directly to the file.
+- **Credit on Check**: Ticking a `#timed-N` task by hand fills its time field up to the target, so a habit you completed away from the keyboard still counts. An already longer time is never lowered.
+- **Audio Feedback**: Distinct cues for start, stop and goal reached, synthesized with the Web Audio API (no sound files to ship).
 - **Dataview Integration**: Automatically writes the elapsed time (e.g., `[reading-time:: 30m 20s]`) for easy dashboard aggregation, streaks, and check counts.
 
 ## Prerequisites
@@ -51,9 +54,10 @@ Create a checklist for your habits in your daily template file. Add the tag `#ti
 
 ### 2. Track your Time
 When you open a note with these tasks in **Live Preview**, a ▶️ button will appear next to the `#timed` tags. 
-- Click ▶️ to start tracking.
+- Click ▶️ to start tracking — from the note, or from the list in the sidebar panel.
 - The sidebar panel will automatically update to show your active session.
-- Click ⏹️ to stop. The plugin will append a Dataview inline field (like `[deep-work-time:: 30m 22s]`) to the line.
+- When a `#timed-N` goal is reached the box gets checked and you hear the completion cue; the timer carries on until you stop it.
+- Click ⏹️ to stop, in the note or in the panel. The plugin writes a Dataview inline field (like `[deep-work-time:: 30m 22s]`) right after the tag, so trailing markers such as the Tasks plugin's `✅ 2026-01-01` stay at the end of the line.
 
 ![Main View](assets/main_view.png)
 

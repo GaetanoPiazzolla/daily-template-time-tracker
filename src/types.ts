@@ -7,7 +7,19 @@ export interface TimerState {
 	targetMinutes: number | null;
 }
 
+export interface TimedTask {
+	habitName: string;
+	lineText: string;
+	targetMinutes: number | null;
+	loggedSeconds: number;
+	checked: boolean;
+}
+
+const UNCHECKED_TASK_REGEX = /^(\s*[-*+])\s+\[ \]/;
+const TIME_FIELD_REGEX = /\[([a-z0-9-]+)-time::\s*([^\]]*)\]/;
+
 export function extractHabitName(lineText: string): string | null {
+	if (!lineText.includes("#timed")) return null;
 	const match = lineText.match(/- \[[ xX]\]\s+\S+\s+\*{0,2}(.+?)\*{0,2}\s+#timed(?:-\d+)?/);
 	if (!match) return null;
 	return match[1].trim();
@@ -18,6 +30,20 @@ export function extractTargetMinutes(lineText: string): number | null {
 	return match ? parseInt(match[1], 10) : null;
 }
 
+export function isTaskChecked(lineText: string): boolean {
+	return /^(\s*[-*+])\s+\[[xX]\]/.test(lineText);
+}
+
+export function isTaskUnchecked(lineText: string): boolean {
+	return UNCHECKED_TASK_REGEX.test(lineText);
+}
+
+/** The line with its checkbox ticked, or null if it was not an unchecked task. */
+export function checkTaskLine(lineText: string): string | null {
+	if (!UNCHECKED_TASK_REGEX.test(lineText)) return null;
+	return lineText.replace(UNCHECKED_TASK_REGEX, "$1 [x]");
+}
+
 export function habitNameToFieldKey(habitName: string): string {
 	return habitName
 		.toLowerCase()
@@ -26,12 +52,10 @@ export function habitNameToFieldKey(habitName: string): string {
 }
 
 export function extractExistingSeconds(lineText: string, habitName: string): number {
-	const key = habitNameToFieldKey(habitName);
-	const regex = new RegExp(`\\[${key}-time::\\s*(.*?)\\]`);
-	const match = lineText.match(regex);
-	if (!match) return 0;
+	const match = lineText.match(TIME_FIELD_REGEX);
+	if (!match || match[1] !== habitNameToFieldKey(habitName)) return 0;
 	
-	const timeStr = match[1];
+	const timeStr = match[2];
 	let totalSeconds = 0;
 	
 	const hMatch = timeStr.match(/(\d+)h/);
@@ -73,8 +97,7 @@ export function formatElapsedDisplay(ms: number, initialSeconds: number = 0, tar
 	return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-export function buildTimeField(habitName: string, totalSeconds: number): string {
-	const key = habitNameToFieldKey(habitName);
+export function formatDuration(totalSeconds: number): string {
 	let timeStr = "";
 	
 	const hours = Math.floor(totalSeconds / 3600);
@@ -85,5 +108,39 @@ export function buildTimeField(habitName: string, totalSeconds: number): string 
 	if (minutes > 0 || hours > 0) timeStr += `${minutes}m `;
 	timeStr += `${seconds}s`;
 	
-	return `[${key}-time:: ${timeStr.trim()}]`;
+	return timeStr.trim();
+}
+
+export function buildTimeField(habitName: string, totalSeconds: number): string {
+	return `[${habitNameToFieldKey(habitName)}-time:: ${formatDuration(totalSeconds)}]`;
+}
+
+// Keep the field attached to the #timed tag so trailing markers (es. ✅ 2026-01-01) stay last
+export function setTimeFieldOnLine(lineText: string, habitName: string, timeField: string): string {
+	const existing = lineText.match(TIME_FIELD_REGEX);
+	if (existing?.index !== undefined && existing[1] === habitNameToFieldKey(habitName)) {
+		const before = lineText.slice(0, existing.index).replace(/ +$/, "");
+		return `${before} ${timeField}${lineText.slice(existing.index + existing[0].length)}`;
+	}
+
+	const tag = lineText.match(/#timed(?:-\d+)?/);
+	if (!tag || tag.index === undefined) return `${lineText} ${timeField}`;
+	const at = tag.index + tag[0].length;
+	return `${lineText.slice(0, at)} ${timeField}${lineText.slice(at).replace(/^\s+/, " ")}`;
+}
+
+export function parseTimedTasks(content: string): TimedTask[] {
+	const tasks: TimedTask[] = [];
+	for (const lineText of content.split("\n")) {
+		const habitName = extractHabitName(lineText);
+		if (!habitName) continue;
+		tasks.push({
+			habitName,
+			lineText,
+			targetMinutes: extractTargetMinutes(lineText),
+			loggedSeconds: extractExistingSeconds(lineText, habitName),
+			checked: isTaskChecked(lineText),
+		});
+	}
+	return tasks;
 }

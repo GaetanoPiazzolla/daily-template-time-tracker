@@ -1,5 +1,8 @@
 import { EditorView, WidgetType } from "@codemirror/view";
 
+export const PLAY_ICON_SVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>`;
+export const STOP_ICON_SVG = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
+
 export interface TimerWidgetConfig {
 	lineText: string;
 	habitName: string;
@@ -31,12 +34,7 @@ export class TimerButtonWidget extends WidgetType {
 		btn.type = "button";
 		btn.setAttribute("aria-label", this.config.isRunning ? "Stop timer" : "Start timer");
 		
-		// Use identical SVG structure for consistent styling
-		if (this.config.isRunning) {
-			btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
-		} else {
-			btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>`;
-		}
+		btn.innerHTML = this.config.isRunning ? STOP_ICON_SVG : PLAY_ICON_SVG;
 
 		btn.addEventListener("click", (e) => {
 			e.preventDefault();

@@ -103,6 +103,67 @@
 	color: var(--text-on-accent);
 }
 
+/* Timer View: lista dei #timed quando nessun timer è attivo */
+.dttt-view-list {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 8px 4px;
+}
+
+.dttt-view-list-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	padding: 0 6px 6px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	margin-bottom: 4px;
+}
+
+.dttt-view-list-title {
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.dttt-view-list-source,
+.dttt-view-row-meta {
+	font-size: 0.8em;
+	color: var(--text-muted);
+}
+
+.dttt-view-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 6px;
+	border-radius: var(--radius-s);
+}
+
+.dttt-view-row:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.dttt-view-row.dttt-done {
+	opacity: 0.55;
+}
+
+.dttt-view-row-info {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.dttt-view-row-name {
+	color: var(--text-normal);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.dttt-view-row-meta {
+	font-family: var(--font-monospace);
+}
+
 /* --- Spaziatura per le abitudini (Padding sotto le note) --- */
 
 /* Live Preview: Aggiunge spazio prima di ogni checkbox che contiene i tag delle abitudini */
